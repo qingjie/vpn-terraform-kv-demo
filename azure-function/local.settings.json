@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "<your-storage-connection-string>",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "KEYVAULT_NAME": "<your-keyvault-name>",
+    "AZDO_ORG": "<your-org>",
+    "AZDO_PROJECT": "<your-project>",
+    "AZDO_PIPELINE_ID": "<pipeline-id>"
+  }
+}

@@ -1,0 +1,58 @@
+trigger:
+- main
+
+stages:
+- stage: Dev
+  displayName: Deploy to DEV
+  jobs:
+  - job: Terraform_Dev
+    pool:
+      name: 'vpn-self-hosted-pool'
+    steps:
+    - checkout: self
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'YourServiceConnection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          terraform init -backend-config="storage_account_name=tfstatedeveastus" -backend-config="key=dev.terraform.tfstate"
+          terraform apply -auto-approve -var-file="envs/dev.tfvars"
+
+- stage: QA
+  displayName: Deploy to QA
+  dependsOn: Dev
+  condition: succeeded()
+  jobs:
+  - job: Terraform_QA
+    pool:
+      name: 'vpn-self-hosted-pool'
+    steps:
+    - checkout: self
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'YourServiceConnection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          terraform init -backend-config="storage_account_name=tfstateqaeastus" -backend-config="key=qa.terraform.tfstate"
+          terraform apply -auto-approve -var-file="envs/qa.tfvars"
+
+- stage: Prod
+  displayName: Deploy to PROD
+  dependsOn: QA
+  condition: succeeded()
+  jobs:
+  - job: Terraform_Prod
+    pool:
+      name: 'vpn-self-hosted-pool'
+    steps:
+    - checkout: self
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'YourServiceConnection'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          terraform init -backend-config="storage_account_name=tfstateprodeastus" -backend-config="key=prod.terraform.tfstate"
+          terraform apply -auto-approve -var-file="envs/prod.tfvars"

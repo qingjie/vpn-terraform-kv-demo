@@ -1,0 +1,20 @@
+{
+  "version": "Dashboard/v1.0",
+  "items": [
+    {
+      "type": "Microsoft.Azure.Monitor.LogQuery",
+      "name": "ErrorRateAndCPU_MultiRegion",
+      "settings": {
+        "query": "let startTime = ago(1d); union workspace('workspace-eastus').ContainerAppLogs_CL, workspace('workspace-westus2').ContainerAppLogs_CL | where TimeGenerated > startTime | summarize Errors = countif(Level == \"Error\"), Total = count(), AvgCPU = avg(toint(CpuUsage_s)) by bin(TimeGenerated, 1h), Region = iff(ClusterName_s contains \"eastus\", \"East US\", \"West US\") | extend ErrorRate = todouble(Errors) / todouble(Total) * 100 | project TimeGenerated, Region, ErrorRate, AvgCPU | render timechart",
+        "timespan": "PT24H"
+      },
+      "position": {
+        "x": 0,
+        "y": 0,
+        "width": 24,
+        "height": 8
+      }
+    }
+  ],
+  "metadata": {}
+}
